@@ -78,6 +78,8 @@ namespace WindowsForms
                 //调用方法，替换数据title中的关键词，也就是高亮此关键词                
                 result.content = highter.GetBestFragment("汽车", doc.Get("id"));
 
+
+
                 resultList.Add(result);
             }
 
