@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewBag.Title = "Search";
+}
+<script src="~/Scripts/jquery-3.3.1.js"></script>
+<h2>Search</h2>
+<script type="text/javascript">
+    $(function () {
+        $("button").click(function () {
+            $.ajax({
+                url: "@Url.Action()",
+                type: "get",
+                data: { Keywords: $("#Keywords").val() },
+                dataType: "json",
+                success: function (d) {
+                    console.log(d);
+                }
+            });
+        })
+    })
+</script>
+<input type="text" id="Keywords" /><button type="button">查询</button>
