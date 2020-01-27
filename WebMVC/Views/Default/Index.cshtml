@@ -1,0 +1,36 @@
+﻿@model WebMVC.Models.News
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+<style type="text/css">
+    td *{margin:5px;}
+    textarea#Content{height:10em;width:100%;}
+</style>
+
+@using (Html.BeginForm())
+{
+<table cellpadding="5" cellspacing="5" style="width:500px;">
+    <tr>
+        <td>ID:</td>
+        <td>@Html.TextBoxFor(m => m.Id)</td>
+    </tr>
+    <tr>
+        <td>标题:</td>
+        <td>@Html.TextBoxFor(m => m.Title)</td>
+    </tr>
+    <tr>
+        <td>内容:</td>
+        <td>@Html.TextAreaFor(m => m.Content)</td>
+    </tr>
+    <tr>
+        <td>时间:</td>
+        <td>@Html.TextBoxFor(m => m.AddTime)</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td><button type="submit">保存</button></td>
+    </tr>
+</table>
+}
