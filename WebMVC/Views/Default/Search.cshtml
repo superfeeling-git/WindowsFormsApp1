@@ -4,6 +4,9 @@
 }
 <script src="~/Scripts/jquery-3.3.1.js"></script>
 <h2>Search</h2>
+<style type="text/css">
+    .result h1{font-size:15px;}
+</style>
 <script type="text/javascript">
     $(function () {
         $("button").click(function () {
@@ -13,11 +16,16 @@
                 data: { Keywords: $("#Keywords").val() },
                 dataType: "json",
                 success: function (d) {
-                    console.log(d);
+                    for (i = 0; i < d.length; i++)
+                    {
+                        $(".result").append("<p><h1>" + d[i].Title + "</h1><div>" + d[i].Content + "</div></p>");
+                    }
                 }
             });
         })
     })
 </script>
+<div class="result">
+</div>
 <input type="text" id="Keywords" />
 <button type="button">查询</button>

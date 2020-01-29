@@ -96,6 +96,7 @@ namespace WebMVC.Controllers
                 doc.Add(new Field("Content", Model.Content, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_OFFSETS));
                 doc.Add(new Field("AddTime", Model.AddTime.ToString("yyyy-MM-dd HH:mm:ss"), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_OFFSETS));
                 iw.UpdateDocument(term, doc, new PanGuAnalyzer());
+                iw.Optimize();
             }
         }
 
@@ -199,17 +200,26 @@ namespace WebMVC.Controllers
 
             IndexSearcher searcher = new IndexSearcher(reader);
 
-            //设置查询
+            //设置查询条件
             Query query = new TermQuery(new Term("Content", keyWord));
 
+            //设置过滤器
+            //TermRangeFilter filter = new TermRangeFilter()
+            //RangeFilter filter = new RangeFilter("time", "20060101", "20060230", true, true);
+            
             TopScoreDocCollector collector = TopScoreDocCollector.Create(1000, true);
 
+            Sort sort = new Sort(new SortField("Content", SortField.STRING, true));
+
             // 使用query这个查询条件进行搜索，搜索结果放入collector
-            searcher.Search(query, null, collector);
+            TopFieldDocs tt = searcher.Search(query, null, 1000, sort);            
 
             // 从查询结果中取出第m条到第n条的数据
             // collector.GetTotalHits()表示总的结果条数
-            ScoreDoc[] docs = collector.TopDocs(0, collector.TotalHits).ScoreDocs;
+            ScoreDoc[] docc = collector.TopDocs(0, collector.TotalHits).ScoreDocs;
+
+            //按排序来取
+            ScoreDoc[] docs = tt.ScoreDocs;
 
             // 遍历查询结果
             List<News> resultList = new List<News>();
@@ -217,8 +227,8 @@ namespace WebMVC.Controllers
             {
                 // 拿到文档的id，因为Document可能非常占内存（DataSet和DataReader的区别）
                 int docId = docs[i].Doc;
-                //// 所以查询结果中只有id，具体内容需要二次查询
-                //// 根据id查询内容：放进去的是Document，查出来的还是Document
+                // 所以查询结果中只有id，具体内容需要二次查询
+                // 根据id查询内容：放进去的是Document，查出来的还是Document
                 Document doc = searcher.Doc(docId);
                 News result = new News();
                 result.Id = Convert.ToInt32(doc.Get("id"));
