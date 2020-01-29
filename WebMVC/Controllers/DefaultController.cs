@@ -200,26 +200,29 @@ namespace WebMVC.Controllers
 
             IndexSearcher searcher = new IndexSearcher(reader);
 
+            TopScoreDocCollector collector = TopScoreDocCollector.Create(1000, true);
+
+            //============完整设置查询条件、过滤器、结果排序的使用方法==============
             //设置查询条件
             Query query = new TermQuery(new Term("Content", keyWord));
 
             //设置过滤器
-            //TermRangeFilter filter = new TermRangeFilter()
-            //RangeFilter filter = new RangeFilter("time", "20060101", "20060230", true, true);
+            TermRangeFilter Termquery = new TermRangeFilter("AddTime", "2020-01-01 15:23:33", "2020-01-29 15:56:33", true, true);            
             
-            TopScoreDocCollector collector = TopScoreDocCollector.Create(1000, true);
-
+            //结果排序
             Sort sort = new Sort(new SortField("Content", SortField.STRING, true));
 
             // 使用query这个查询条件进行搜索，搜索结果放入collector
-            TopFieldDocs tt = searcher.Search(query, null, 1000, sort);            
-
-            // 从查询结果中取出第m条到第n条的数据
-            // collector.GetTotalHits()表示总的结果条数
-            ScoreDoc[] docc = collector.TopDocs(0, collector.TotalHits).ScoreDocs;
+            TopFieldDocs tt = searcher.Search(query, Termquery, 1000, sort);
 
             //按排序来取
             ScoreDoc[] docs = tt.ScoreDocs;
+            //============完整设置查询条件、过滤器、结果排序的使用方法==============
+
+            // 从查询结果中取出第m条到第n条的数据
+            // collector.GetTotalHits()表示总的结果条数
+            //searcher.Search(query, null, collector);
+            //ScoreDoc[] docs = collector.TopDocs(0, collector.TotalHits).ScoreDocs;
 
             // 遍历查询结果
             List<News> resultList = new List<News>();
@@ -249,6 +252,9 @@ namespace WebMVC.Controllers
 
                 resultList.Add(result);
             }
+
+            reader.Close();
+            reader.Dispose();
 
             return resultList;
         }
