@@ -35,6 +35,19 @@ namespace WebMVC.Controllers
         }
 
         [HttpGet]
+        public ActionResult Update()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Update(News Model)
+        {
+            UpdateIndex(Model);
+            return RedirectToAction("Update");
+        }
+
+        [HttpGet]
         public ActionResult Search(string Keywords)
         {
             if(Request.IsAjaxRequest())
@@ -44,6 +57,54 @@ namespace WebMVC.Controllers
             return View();
         }
 
+
+        public ActionResult Delete(int? id)
+        {
+            Response.Write(DeleteIndex((int)id));
+            return View();
+        }
+
+        /// <summary>
+        /// 删除索引
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public string DeleteIndex(int id)
+        {
+            Lucene.Net.Store.Directory dict = Lucene.Net.Store.FSDirectory.Open(Server.MapPath("/Indexs"));
+            using (IndexReader reader = IndexReader.Open(dict, false))
+            {
+                reader.DeleteDocuments(new Term("Id", id.ToString()));
+                return "删除成功";
+            }
+        }
+
+        /// <summary>
+        /// 更新索引
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="Model"></param>
+        public void UpdateIndex(News Model)
+        {
+            Lucene.Net.Store.Directory dict = Lucene.Net.Store.FSDirectory.Open(Server.MapPath("/Indexs"));
+            using (IndexWriter iw = new IndexWriter(dict, new PanGuAnalyzer(), IndexWriter.MaxFieldLength.UNLIMITED))
+            {
+                Term term = new Term("Id", Model.Id.ToString());
+                Document doc = new Document();
+                doc.Add(new Field("Id", Model.Id.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
+                doc.Add(new Field("Title", Model.Title, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_OFFSETS));
+                doc.Add(new Field("Content", Model.Content, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_OFFSETS));
+                doc.Add(new Field("AddTime", Model.AddTime.ToString("yyyy-MM-dd HH:mm:ss"), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_OFFSETS));
+                iw.UpdateDocument(term, doc, new PanGuAnalyzer());
+            }
+        }
+
+        /// <summary>
+        /// 根据不同分词器测试不同效果
+        /// </summary>
+        /// <param name="Content"></param>
+        /// <param name="analyzer"></param>
+        /// <returns></returns>
         public List<string> Analyzers(string Content,Analyzer analyzer)
         {
             List<string> strs = new List<string>();
@@ -63,6 +124,11 @@ namespace WebMVC.Controllers
             return strs;
         }
 
+        /// <summary>
+        /// 根据不同分词器测试不同效果
+        /// </summary>
+        /// <param name="Content"></param>
+        /// <returns></returns>
         public List<string> Analyzers(string Content)
         {
             return Analyzers(Content, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_30));
@@ -81,7 +147,7 @@ namespace WebMVC.Controllers
             Analyzer analyzer = new PanGuAnalyzer();
 
             //定义索引用到的目录
-            FSDirectory d = FSDirectory.Open(new DirectoryInfo(path), new NativeFSLockFactory());
+            Lucene.Net.Store.Directory d = FSDirectory.Open(new DirectoryInfo(path), new NativeFSLockFactory());
 
             //如果指定目录中存在索引，则返回true,否则返回假  6217 0001 4002 9603 964
             bool isUpdate = IndexReader.IndexExists(d);
@@ -111,6 +177,11 @@ namespace WebMVC.Controllers
             }
         }
 
+        /// <summary>
+        /// 查询
+        /// </summary>
+        /// <param name="keyWord"></param>
+        /// <returns></returns>
         public List<News> search(string keyWord)
         {
             //定义分词器
@@ -171,7 +242,5 @@ namespace WebMVC.Controllers
 
             return resultList;
         }
-
-
     }
 }

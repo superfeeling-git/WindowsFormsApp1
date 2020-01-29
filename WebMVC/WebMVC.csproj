@@ -188,6 +188,8 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Default\Index.cshtml" />
     <Content Include="Views\Default\Search.cshtml" />
+    <Content Include="Views\Default\Delete.cshtml" />
+    <Content Include="Views\Default\Update.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
