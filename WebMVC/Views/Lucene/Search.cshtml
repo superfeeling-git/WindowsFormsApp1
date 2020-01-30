@@ -1,0 +1,17 @@
+﻿@model IEnumerable<WebMVC.Models.Product>
+@{
+    ViewBag.Title = "Search";
+}
+<style type="text/css">
+    div{line-height:210%;}
+</style>
+
+<h2>Search</h2>
+@if(Model != null)
+{
+    foreach(var p in Model)
+    {
+        <div class="clearfix"><span class="pull-left">产品名称：@p.ProductName</span><span class="pull-right">发布时间：@p.CreateTime  排序ID：@p.OrderId</span></div>
+        <div class="clearfix">@Html.Raw(p.Detail)</div>
+    }
+}

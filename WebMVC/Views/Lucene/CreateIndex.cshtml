@@ -1,0 +1,23 @@
+﻿@model WebMVC.Models.Product
+@{
+    ViewBag.Title = "CreateIndex";
+}
+
+<h2>CreateIndex</h2>
+@using (Html.BeginForm())
+{
+<table>
+    <tr>
+        <td>产品名称：</td>
+        <td>@Html.TextBoxFor(m => m.ProductName)</td>
+    </tr>
+    <tr>
+        <td>产品介绍：</td>
+        <td>@Html.TextAreaFor(m => m.Detail, 9, 60, new { })</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td><button type="submit">提交</button></td>
+    </tr>
+</table>
+}

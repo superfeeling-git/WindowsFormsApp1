@@ -189,7 +189,9 @@ namespace WebMVC.Controllers
             using (IndexWriter iw = new IndexWriter(d, analyzer, !isUpdate, IndexWriter.MaxFieldLength.LIMITED))
             {
                 Random random = new Random();
-                 
+                for(int i = 100; i < 110; i++)
+                {
+                    DateTime dt = DateTime.Now.AddHours(random.Next(100, 1000));
                     Document doc = new Document();
                     //按数字域进行存储
                     doc.Add(new NumericField("Id",Field.Store.YES,true).SetIntValue(Model.Id));
@@ -198,13 +200,13 @@ namespace WebMVC.Controllers
 
                     doc.Add(new Field("Content", Model.Content, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_OFFSETS));
 
-                    doc.Add(new Field("AddTime", Model.AddTime.AddDays(random.Next(10, 100)).ToString("yyyy-MM-dd HH:mm:ss"), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+                    doc.Add(new Field("AddTime", dt.ToString("yyyy-MM-dd HH:mm:ss"), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
 
-                    doc.Add(new Field("OrderField", DateTools.DateToString(Model.AddTime.AddDays(random.Next(10, 100)),DateTools.Resolution.MINUTE), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+                    doc.Add(new NumericField("OrderId", Field.Store.YES, true).SetLongValue(Convert.ToInt64(DateTools.DateToString(dt, DateTools.Resolution.SECOND))));
 
                     iw.AddDocument(doc);
 
-
+                }
                 iw.Optimize();
             }
         }
@@ -244,7 +246,7 @@ namespace WebMVC.Controllers
             NumericRangeFilter<int> IdRange = NumericRangeFilter.NewIntRange("Id", 1, 6, true, true);
 
             //结果排序
-            Sort sort = new Sort(new SortField("OrderField", SortField.DOC, false));
+            Sort sort = new Sort(new SortField("OrderId", SortField.LONG, true));
 
             // 使用query这个查询条件进行搜索，搜索结果放入collector
             TopFieldDocs tt = searcher.Search(query, null, 1000, sort);
