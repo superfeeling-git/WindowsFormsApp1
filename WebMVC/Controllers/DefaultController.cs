@@ -217,8 +217,10 @@ namespace WebMVC.Controllers
             //============完整设置查询条件、过滤器、结果排序的使用方法==============
             //设置查询条件
             PhraseQuery query = new PhraseQuery();
-            query.Slop = 3;
-            query.Add(new Term("Content", keyWord));
+            query.Slop = 8;
+            query.Add(new Term("Content", "中"));
+            query.Add(new Term("Content", "记"));
+
 
 
             //设置过滤器
