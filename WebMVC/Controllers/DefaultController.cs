@@ -148,9 +148,16 @@ namespace WebMVC.Controllers
             Analyzer analyzer = new PanGuAnalyzer();
 
             //定义索引用到的目录
+            //Lock的作用是防止一个Lucene索引，同一时刻被多个IndexWriter进行写操作；
+            //如果一个Lucene索引同时被多个IndexWriter进行写操作，可能造成索引损坏。
+            //在一个Lucene索引被锁住后，Lucene索引文件夹内一定有一个write.lock文件，反之，则不一定。
+            //IndexWriter 默认使用 NativeFSLockFactory；
+            //NativeFSLockFactory的主要好处是，如果JIT出现异常退出，操作系统会删除锁，而不是锁定文件，虽然write.lock依然存在；
+            //正常退出的情况下，write.lock也不会被删除，只是Lucene会释放write.lock文件的引用。
             Lucene.Net.Store.Directory d = FSDirectory.Open(new DirectoryInfo(path), new NativeFSLockFactory());
 
             //如果指定目录中存在索引，则返回true,否则返回假  6217 0001 4002 9603 964
+            
             bool isUpdate = IndexReader.IndexExists(d);
             if (isUpdate)
             {
@@ -207,13 +214,14 @@ namespace WebMVC.Controllers
             Query query = new TermQuery(new Term("Content", keyWord));
 
             //设置过滤器
-            TermRangeFilter Termquery = new TermRangeFilter("AddTime", "2020-01-01 15:23:33", "2020-01-29 15:56:33", true, true);            
-            
+            TermRangeFilter Termquery = new TermRangeFilter("AddTime", "2020-01-01 15:23:33", "2020-01-29 15:56:33", true, true);
+            NumericRangeFilter<int> a = NumericRangeFilter.NewIntRange("Id", 1, 3, true, true);
+
             //结果排序
             Sort sort = new Sort(new SortField("Content", SortField.STRING, true));
 
             // 使用query这个查询条件进行搜索，搜索结果放入collector
-            TopFieldDocs tt = searcher.Search(query, Termquery, 1000, sort);
+            TopFieldDocs tt = searcher.Search(query, a, 1000, sort);
 
             //按排序来取
             ScoreDoc[] docs = tt.ScoreDocs;
@@ -253,7 +261,7 @@ namespace WebMVC.Controllers
                 resultList.Add(result);
             }
 
-            reader.Close();
+            //reader.Close();
             reader.Dispose();
 
             return resultList;
