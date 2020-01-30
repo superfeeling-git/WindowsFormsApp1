@@ -170,11 +170,10 @@ namespace WebMVC.Controllers
             using (IndexWriter iw = new IndexWriter(d, analyzer, !isUpdate, IndexWriter.MaxFieldLength.LIMITED))
             {
                 Random random = new Random();
-                for(int i = 1; i <= 10; i++)
-                { 
+                 
                     Document doc = new Document();
                     //按数字域进行存储
-                    doc.Add(new NumericField("Id",Field.Store.YES,true).SetIntValue(i));
+                    doc.Add(new NumericField("Id",Field.Store.YES,true).SetIntValue(Model.Id));
 
                     doc.Add(new Field("Title", Model.Title, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_OFFSETS));
 
@@ -185,7 +184,6 @@ namespace WebMVC.Controllers
                     doc.Add(new Field("OrderField", DateTools.DateToString(Model.AddTime.AddDays(random.Next(10, 100)),DateTools.Resolution.MINUTE), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
 
                     iw.AddDocument(doc);
-                }
 
 
                 iw.Optimize();
@@ -218,7 +216,10 @@ namespace WebMVC.Controllers
 
             //============完整设置查询条件、过滤器、结果排序的使用方法==============
             //设置查询条件
-            Query query = new TermQuery(new Term("Content", keyWord));
+            PhraseQuery query = new PhraseQuery();
+            query.Slop = 3;
+            query.Add(new Term("Content", keyWord));
+
 
             //设置过滤器
             NumericRangeFilter<int> IdRange = NumericRangeFilter.NewIntRange("Id", 1, 6, true, true);
@@ -227,7 +228,7 @@ namespace WebMVC.Controllers
             Sort sort = new Sort(new SortField("OrderField", SortField.DOC, false));
 
             // 使用query这个查询条件进行搜索，搜索结果放入collector
-            TopFieldDocs tt = searcher.Search(query, IdRange, 1000, sort);
+            TopFieldDocs tt = searcher.Search(query, null, 1000, sort);
 
             //按排序来取
             ScoreDoc[] docs = tt.ScoreDocs;
