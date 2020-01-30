@@ -16,6 +16,7 @@ using Lucene.Net.Analysis.Tokenattributes;
 using Lucene.Net.Analysis.PanGu;
 using Lucene.Net.Search;
 using PanGu.HighLight;
+using PanGu;
 
 namespace WebMVC.Controllers
 {
@@ -62,6 +63,24 @@ namespace WebMVC.Controllers
         {
             Response.Write(DeleteIndex((int)id));
             return View();
+        }
+
+        [HttpGet]
+        public ActionResult Analyzer(string[] strs)
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Analyzerss(string Content)
+        {
+            Segment s = new Segment();
+            ICollection<WordInfo> wordInfo = s.DoSegment(Content);
+            foreach(var p in wordInfo)
+            {
+                Response.Write(p + " | ");
+            }
+            return null;
         }
 
         /// <summary>
@@ -218,9 +237,7 @@ namespace WebMVC.Controllers
             //设置查询条件
             PhraseQuery query = new PhraseQuery();
             query.Slop = 8;
-            query.Add(new Term("Content", "中"));
-            query.Add(new Term("Content", "记"));
-
+            query.Add(new Term("Content", keyWord));
 
 
             //设置过滤器

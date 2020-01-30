@@ -1,0 +1,13 @@
+﻿@model List<string>
+@{
+    ViewBag.Title = "Analyzer";
+}
+
+<h2>Analyzer</h2>
+@using(Html.BeginForm("Analyzerss","Default"))
+{
+<div>
+    <textarea name="Content" id="Content" rows="8" cols="60" ></textarea>
+    <button type="submit"> 提交 </button>
+</div>
+}
