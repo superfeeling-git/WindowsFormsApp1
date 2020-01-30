@@ -1,11 +1,13 @@
-﻿
+﻿@using Lucene.Net.Documents
 @{
     ViewBag.Title = "Search";
 }
 <script src="~/Scripts/jquery-3.3.1.js"></script>
 <h2>Search</h2>
 <style type="text/css">
-    .result h1{font-size:15px;}
+    .result h1 {
+        font-size: 15px;
+    }
 </style>
 <script type="text/javascript">
     $(function () {
@@ -18,7 +20,7 @@
                 success: function (d) {
                     for (i = 0; i < d.length; i++)
                     {
-                        $(".result").append("<p><h1>" + d[i].Title + "</h1><div>" + d[i].Content + "</div></p>");
+                        $(".result").append("<p><h1><b>" + d[i].Id + "</b>" + d[i].Title + "</h1><div>" + d[i].Content + "</div><div>" + new Date(parseInt(d[i].AddTime.substr(6, 13))).toLocaleString() + "</div></p>");
                     }
                 }
             });
@@ -29,3 +31,11 @@
 </div>
 <input type="text" id="Keywords" />
 <button type="button">查询</button>
+<br /><br />
+@*DAY:@DateTools.DateToString(DateTime.Now, DateTools.Resolution.DAY)<br />
+HOUR:@DateTools.DateToString(DateTime.Now, DateTools.Resolution.HOUR)<br />
+MILLISECOND:@DateTools.DateToString(DateTime.Now, DateTools.Resolution.MILLISECOND)<br />
+MINUTE:@DateTools.DateToString(DateTime.Now, DateTools.Resolution.MINUTE)<br />
+MONTH:@DateTools.DateToString(DateTime.Now, DateTools.Resolution.MONTH)<br />
+SECOND:@DateTools.DateToString(DateTime.Now, DateTools.Resolution.SECOND)<br />
+YEAR:@DateTools.DateToString(DateTime.Now, DateTools.Resolution.YEAR)*@

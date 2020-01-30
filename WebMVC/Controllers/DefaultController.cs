@@ -169,17 +169,24 @@ namespace WebMVC.Controllers
             //第三个参数：true：创建索引或覆盖现有索引，false：追加索引
             using (IndexWriter iw = new IndexWriter(d, analyzer, !isUpdate, IndexWriter.MaxFieldLength.LIMITED))
             {
-                Document doc = new Document();
+                Random random = new Random();
+                for(int i = 1; i <= 10; i++)
+                { 
+                    Document doc = new Document();
+                    //按数字域进行存储
+                    doc.Add(new NumericField("Id",Field.Store.YES,true).SetIntValue(i));
 
-                doc.Add(new Field("Id", Model.Id.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
+                    doc.Add(new Field("Title", Model.Title, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_OFFSETS));
 
-                doc.Add(new Field("Title", Model.Title, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_OFFSETS));
+                    doc.Add(new Field("Content", Model.Content, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_OFFSETS));
 
-                doc.Add(new Field("Content", Model.Content, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_OFFSETS));
+                    doc.Add(new Field("AddTime", Model.AddTime.AddDays(random.Next(10, 100)).ToString("yyyy-MM-dd HH:mm:ss"), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
 
-                doc.Add(new Field("AddTime", Model.AddTime.ToString("yyyy-MM-dd HH:mm:ss"), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_OFFSETS));
+                    doc.Add(new Field("OrderField", DateTools.DateToString(Model.AddTime.AddDays(random.Next(10, 100)),DateTools.Resolution.MINUTE), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
 
-                iw.AddDocument(doc);
+                    iw.AddDocument(doc);
+                }
+
 
                 iw.Optimize();
             }
@@ -214,21 +221,20 @@ namespace WebMVC.Controllers
             Query query = new TermQuery(new Term("Content", keyWord));
 
             //设置过滤器
-            TermRangeFilter Termquery = new TermRangeFilter("AddTime", "2020-01-01 15:23:33", "2020-01-29 15:56:33", true, true);
-            NumericRangeFilter<int> a = NumericRangeFilter.NewIntRange("Id", 1, 3, true, true);
+            NumericRangeFilter<int> IdRange = NumericRangeFilter.NewIntRange("Id", 1, 6, true, true);
 
             //结果排序
-            Sort sort = new Sort(new SortField("Content", SortField.STRING, true));
+            Sort sort = new Sort(new SortField("OrderField", SortField.DOC, false));
 
             // 使用query这个查询条件进行搜索，搜索结果放入collector
-            TopFieldDocs tt = searcher.Search(query, a, 1000, sort);
+            TopFieldDocs tt = searcher.Search(query, IdRange, 1000, sort);
 
             //按排序来取
             ScoreDoc[] docs = tt.ScoreDocs;
-            //============完整设置查询条件、过滤器、结果排序的使用方法==============
+            //============ 完整设置查询条件、过滤器、结果排序的使用方法 ==============
 
-            // 从查询结果中取出第m条到第n条的数据
-            // collector.GetTotalHits()表示总的结果条数
+            //  从查询结果中取出第m条到第n条的数据
+            //collector.GetTotalHits()表示总的结果条数
             //searcher.Search(query, null, collector);
             //ScoreDoc[] docs = collector.TopDocs(0, collector.TotalHits).ScoreDocs;
 
@@ -242,7 +248,7 @@ namespace WebMVC.Controllers
                 // 根据id查询内容：放进去的是Document，查出来的还是Document
                 Document doc = searcher.Doc(docId);
                 News result = new News();
-                result.Id = Convert.ToInt32(doc.Get("id"));
+                result.Id = Convert.ToInt32(doc.Get("Id"));
 
                 result.Title = doc.Get("Title");
 
